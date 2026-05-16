@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Weather Dashboard</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 </head>
 <body>
   <div class="page">
@@ -16,14 +17,11 @@
     </div>
 
     <div class="map-card">
-      <iframe
-        src="https://www.google.com/maps?q=Dorado,Puerto+Rico&output=embed"
-        loading="lazy"
-        allowfullscreen>
-      </iframe>
+      <div id="map"></div>
     </div>
   </div>
 
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

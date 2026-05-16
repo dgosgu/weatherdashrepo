@@ -8,3 +8,14 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=Dorado&units=imperial&a
     document.getElementById("wind").textContent = "Wind: " + Math.round(data.wind.speed * 0.869) + " knots";
     document.getElementById("desc").textContent = data.weather[0].description;
   });
+
+  const map = L.map('map').setView([18.4588, -66.2677], 12);
+
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+L.marker([18.4588, -66.2677])
+    .addTo(map)
+    .bindPopup('Dorado, Puerto Rico')
+    .openPopup();
