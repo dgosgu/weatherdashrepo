@@ -1,5 +1,3 @@
-const apiKey = "d86185ad7183835af0bf3351cf1a7f9a";
-
 const locations = {
   "Dorado": {
     query: "Dorado",
@@ -44,7 +42,7 @@ spots.forEach(spot => {
 function loadWeather(locationName) {
   const location = locations[locationName];
 
-  fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location.query}&units=imperial&appid=${apiKey}`)
+  fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location.query}&units=imperial&appid=${OpenWeatherApiKey}`)
     .then(res => res.json())
     .then(data => {
       const windKnots = Math.round(data.wind.speed * 0.869);
