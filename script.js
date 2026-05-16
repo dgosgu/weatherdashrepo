@@ -11,7 +11,7 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=Dorado&units=imperial&a
     document.getElementById("desc").textContent = data.weather[0].description;
   });
 
-const map = L.map("map").setView(BARLOVENTO, 12);
+const map = L.map("map").setView(BARLOVENTO, 13.5);
 
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors"
