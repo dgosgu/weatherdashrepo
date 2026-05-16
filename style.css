@@ -142,3 +142,12 @@ body {
     gap: 8px;
   }
 }
+
+#radarBtn {
+  background: #111827;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+}

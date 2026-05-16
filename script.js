@@ -61,6 +61,44 @@ fetch("/api/mapstyle")
     layer.addTo(map);
   });
 
+
+let radarLayer = null;
+let radarOn = false;
+
+function loadRadarLayer() {
+  fetch("https://api.rainviewer.com/public/weather-maps.json")
+    .then(res => res.json())
+    .then(data => {
+      const frames = data.radar.past;
+      const latestFrame = frames[frames.length - 1];
+
+      const radarUrl =
+        data.host +
+        latestFrame.path +
+        "/256/{z}/{x}/{y}/2/1_1.png";
+
+      radarLayer = L.tileLayer(radarUrl, {
+        opacity: 0.65,
+        zIndex: 500,
+        attribution: "Radar data © RainViewer"
+      });
+
+      radarLayer.addTo(map);
+      radarOn = true;
+    });
+}
+
+document.getElementById("radarBtn").addEventListener("click", function() {
+  if (radarOn && radarLayer) {
+    map.removeLayer(radarLayer);
+    radarOn = false;
+    this.textContent = "Radar";
+  } else {
+    loadRadarLayer();
+    this.textContent = "Radar On";
+  }
+});
+
 const spots = [
   {
     name: "GoodWinds",
