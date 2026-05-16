@@ -22,19 +22,26 @@ const locations = {
 };
 
 const map = L.map("map").setView(locations["Dorado"].coords, 13.3);
-
-fetch("/api/mapstyle")
+const stadiaLayer = fetch("/api/mapstyle")
   .then(res => res.json())
   .then(data => {
-
-    L.tileLayer(data.url, {
+    const layer = L.tileLayer(data.url, {
       maxZoom: 20,
+      errorTileUrl: "",
       attribution:
         '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> ' +
         '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' +
         '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
-    }).addTo(map);
+    });
 
+    layer.on("tileerror", function() {
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        maxZoom: 20,
+        attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
+      }).addTo(map);
+    });
+
+    layer.addTo(map);
   });
 
 const spots = [
