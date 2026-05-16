@@ -92,3 +92,41 @@ body {
 .right-meter {
   right: 0;
 }
+
+.top-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#locationSelect {
+  flex: 1;
+  background: #111827;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px;
+  font-size: 15px;
+}
+
+#favoriteBtn {
+  background: #111827;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.weather-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+
+.weather-main h1,
+.weather-main h2 {
+  margin: 0;
+}
