@@ -1,24 +1,21 @@
 const apiKey = "d86185ad7183835af0bf3351cf1a7f9a";
-const BARLOVENTO = [18.474611640654814,-66.29507660865785];
+const BARLOVENTO = [18.474611640654814, -66.29507660865785];
 
 fetch(`https://api.openweathermap.org/data/2.5/weather?q=Dorado&units=imperial&appid=${apiKey}`)
   .then(res => res.json())
   .then(data => {
+    const windKnots = Math.round(data.wind.speed * 0.869);
+
     document.getElementById("city").textContent = data.name;
     document.getElementById("temp").textContent = Math.round(data.main.temp) + "°F";
-    document.getElementById("wind").textContent =
-      "Wind: " + windKnots + " knots";
+    document.getElementById("wind").textContent = "Wind: " + windKnots + " knots";
     document.getElementById("desc").textContent = data.weather[0].description;
+
+    document.getElementById("kiteMeter").style.background = getKiteColor(windKnots);
+    document.getElementById("surfMeter").style.background = getSurfColor(windKnots);
   });
 
 const map = L.map("map").setView(BARLOVENTO, 13.3);
-const windKnots = Math.round(data.wind.speed * 0.869);
-
-document.getElementById("kiteMeter").style.background =
-  getKiteColor(windKnots);
-
-document.getElementById("surfMeter").style.background =
-  getSurfColor(windKnots);
 
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors"
