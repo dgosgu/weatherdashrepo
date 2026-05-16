@@ -23,16 +23,19 @@ const locations = {
 
 const map = L.map("map").setView(locations["Dorado"].coords, 13.3);
 
-L.tileLayer(
-  "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png",
-  {
-    maxZoom: 20,
-    attribution:
-      '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> ' +
-      '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' +
-      '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
-  }
-).addTo(map);
+fetch("/api/mapstyle")
+  .then(res => res.json())
+  .then(data => {
+
+    L.tileLayer(data.url, {
+      maxZoom: 20,
+      attribution:
+        '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> ' +
+        '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' +
+        '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+  });
 
 const spots = [
   { name: "GoodWinds", coords: [18.474611640654814, -66.29507660865785] },
@@ -43,7 +46,9 @@ const spots = [
 spots.forEach(spot => {
   L.marker(spot.coords)
     .addTo(map)
-    .bindPopup(`<b>${spot.name}</b><br>${spot.coords[0]}, ${spot.coords[1]}`);
+    .bindPopup(
+      `<b>${spot.name}</b><br>${spot.coords[0]}, ${spot.coords[1]}`
+    );
 });
 
 function loadWeather(locationName) {
@@ -54,14 +59,22 @@ function loadWeather(locationName) {
   fetch(`/api/weather?query=${encodeURIComponent(location.query)}`)
     .then(res => res.json())
     .then(data => {
+
       const windKnots = Math.round(data.wind.speed * 0.869);
 
       document.getElementById("city").textContent = locationName;
-      document.getElementById("temp").textContent = Math.round(data.main.temp) + "°F";
-      document.getElementById("wind").textContent = "Wind: " + windKnots + " knots";
-      document.getElementById("desc").textContent = data.weather[0].description;
 
-      document.getElementById("kiteMeter").style.background = getKiteColor(windKnots);
+      document.getElementById("temp").textContent =
+        Math.round(data.main.temp) + "°F";
+
+      document.getElementById("wind").textContent =
+        "Wind: " + windKnots + " knots";
+
+      document.getElementById("desc").textContent =
+        data.weather[0].description;
+
+      document.getElementById("kiteMeter").style.background =
+        getKiteColor(windKnots);
 
       map.setView(location.coords, 13.3);
 
@@ -70,9 +83,11 @@ function loadWeather(locationName) {
 }
 
 function loadMarineData(lat, lng) {
+
   fetch(`/api/marine?lat=${lat}&lng=${lng}`)
     .then(res => res.json())
     .then(data => {
+
       const current = data.hours[0];
 
       const waveHeightMeters =
@@ -97,29 +112,47 @@ function loadMarineData(lat, lng) {
     });
 }
 
-document.getElementById("locationSelect").addEventListener("change", function() {
-  loadWeather(this.value);
-});
+document.getElementById("locationSelect")
+  .addEventListener("change", function() {
+    loadWeather(this.value);
+  });
 
-document.getElementById("favoriteBtn").addEventListener("click", function() {
-  this.textContent = this.textContent === "☆" ? "★" : "☆";
-});
+document.getElementById("favoriteBtn")
+  .addEventListener("click", function() {
+
+    this.textContent =
+      this.textContent === "☆" ? "★" : "☆";
+  });
 
 map.on("click", function(e) {
-  alert("Lat: " + e.latlng.lat + "\nLng: " + e.latlng.lng);
+
+  alert(
+    "Lat: " + e.latlng.lat +
+    "\nLng: " + e.latlng.lng
+  );
 });
 
-const locateControl = L.control({ position: "topright" });
+const locateControl = L.control({
+  position: "topright"
+});
 
 locateControl.onAdd = function() {
-  const button = L.DomUtil.create("button", "locate-btn");
+
+  const button =
+    L.DomUtil.create("button", "locate-btn");
+
   button.innerHTML = "📍";
+
   button.title = "Find my location";
 
   L.DomEvent.disableClickPropagation(button);
 
   button.onclick = function() {
-    map.locate({ setView: true, maxZoom: 16 });
+
+    map.locate({
+      setView: true,
+      maxZoom: 16
+    });
   };
 
   return button;
@@ -128,6 +161,7 @@ locateControl.onAdd = function() {
 locateControl.addTo(map);
 
 map.on("locationfound", function(e) {
+
   L.marker(e.latlng)
     .addTo(map)
     .bindPopup("You are here")
@@ -135,27 +169,52 @@ map.on("locationfound", function(e) {
 });
 
 function getKiteColor(windKnots) {
+
   if (windKnots >= 16 && windKnots <= 25) {
+
     return "#22c55e";
+
   } else if (windKnots >= 10 && windKnots < 16) {
+
     return "#eab308";
+
   } else if (windKnots > 25 && windKnots <= 32) {
+
     return "#eab308";
+
   } else if (windKnots > 32) {
+
     return "#ad005f";
+
   } else {
+
     return "#ef4444";
   }
 }
 
 function getSurfColor(waveHeightFeet, swellPeriod) {
-  if (waveHeightFeet >= 3 && waveHeightFeet <= 8 && swellPeriod >= 9) {
+
+  if (
+    waveHeightFeet >= 3 &&
+    waveHeightFeet <= 8 &&
+    swellPeriod >= 9
+  ) {
+
     return "#22c55e";
-  } else if (waveHeightFeet >= 2 && swellPeriod >= 6) {
+
+  } else if (
+    waveHeightFeet >= 2 &&
+    swellPeriod >= 6
+  ) {
+
     return "#eab308";
+
   } else if (waveHeightFeet > 8) {
+
     return "#ad005f";
+
   } else {
+
     return "#ef4444";
   }
 }
