@@ -18,9 +18,9 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 const spots = [
-  { name: "Barlovento / GoodWinds", coords: [18.4769, -66.2796] },
-  { name: "Dorado Beach", coords: [18.4729, -66.2781] },
-  { name: "Playa Sardinera", coords: [18.4715, -66.2725] }
+  { name: "GoodWinds", coords: [18.474611640654814,-66.29507660865785]},
+  { name: "Dorado Beach", coords: [18.4729, -66.2781]},
+  { name: "Breñas", coords: [18.477883166606762,-66.30981266498567]}
 ];
 
 spots.forEach(spot => {
