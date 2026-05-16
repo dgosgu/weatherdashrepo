@@ -1,5 +1,5 @@
 const apiKey = "d86185ad7183835af0bf3351cf1a7f9a";
-const BARLOVENTO = [18.4769, -66.2796];
+const BARLOVENTO = [18.474611640654814,-66.29507660865785];
 
 fetch(`https://api.openweathermap.org/data/2.5/weather?q=Dorado&units=imperial&appid=${apiKey}`)
   .then(res => res.json())
