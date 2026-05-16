@@ -1,14 +1,22 @@
+const apiKey = "d86185ad7183835af0bf3351cf1a7f9a";
 const BARLOVENTO = [18.4769, -66.2796];
+
+fetch(`https://api.openweathermap.org/data/2.5/weather?q=Dorado&units=imperial&appid=${apiKey}`)
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("city").textContent = data.name;
+    document.getElementById("temp").textContent = Math.round(data.main.temp) + "°F";
+    document.getElementById("wind").textContent =
+      "Wind: " + Math.round(data.wind.speed * 0.869) + " knots";
+    document.getElementById("desc").textContent = data.weather[0].description;
+  });
 
 const map = L.map("map").setView(BARLOVENTO, 15);
 
-// dark map theme
-L.tileLayer("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png", {
-  maxZoom: 20,
-  attribution: '&copy; OpenStreetMap contributors &copy; Stadia Maps'
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "&copy; OpenStreetMap contributors"
 }).addTo(map);
 
-// custom beach icon
 const beachIcon = L.divIcon({
   html: "🌊",
   className: "beach-icon",
@@ -16,28 +24,15 @@ const beachIcon = L.divIcon({
   iconAnchor: [17, 17]
 });
 
-// main marker
 L.marker(BARLOVENTO, { icon: beachIcon })
   .addTo(map)
-  .bindPopup("<b>Barlovento Beach</b><br>Dorado Beach");
+  .bindPopup("<b>Barlovento Beach</b><br>Dorado Beach")
+  .openPopup();
 
-// nearby spots
 const spots = [
-  {
-    name: "Barlovento / GoodWinds",
-    coords: [18.4769, -66.2796],
-    emoji: "🌊"
-  },
-  {
-    name: "Dorado Beach",
-    coords: [18.4729, -66.2781],
-    emoji: "🏖️"
-  },
-  {
-    name: "Playa Sardinera",
-    coords: [18.4715, -66.2725],
-    emoji: "📍"
-  }
+  { name: "Barlovento / GoodWinds", coords: [18.4769, -66.2796], emoji: "🌊" },
+  { name: "Dorado Beach", coords: [18.4729, -66.2781], emoji: "🏖️" },
+  { name: "Playa Sardinera", coords: [18.4715, -66.2725], emoji: "📍" }
 ];
 
 spots.forEach(spot => {
@@ -51,29 +46,4 @@ spots.forEach(spot => {
   L.marker(spot.coords, { icon })
     .addTo(map)
     .bindPopup(`<b>${spot.name}</b>`);
-});
-
-// user location button
-L.control.locateButton = function() {
-  const control = L.control({ position: "topright" });
-
-  control.onAdd = function() {
-    const button = L.DomUtil.create("button", "locate-btn");
-    button.innerHTML = "📍";
-    button.onclick = function() {
-      map.locate({ setView: true, maxZoom: 15 });
-    };
-    return button;
-  };
-
-  return control;
-};
-
-L.control.locateButton().addTo(map);
-
-map.on("locationfound", function(e) {
-  L.marker(e.latlng)
-    .addTo(map)
-    .bindPopup("You are here")
-    .openPopup();
 });
