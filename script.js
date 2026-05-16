@@ -6,4 +6,5 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=Dorado&units=imperial&a
     document.getElementById("city").textContent = data.name;
     document.getElementById("temp").textContent = Math.round(data.main.temp) + "°F";
     document.getElementById("desc").textContent = data.weather[0].description;
+    document.getElementById("wind").textContent = "Wind: " + data.wind.speed * 0.869 + " knots";
   });
