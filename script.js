@@ -41,8 +41,10 @@ spots.forEach(spot => {
 
 function loadWeather(locationName) {
   const location = locations[locationName];
+  const lat = location.coords[0];
+  const lng = location.coords[1];
 
-  fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location.query}&units=imperial&appid=${OpenWeatherApiKey}`)
+  fetch(`/api/weather?query=${encodeURIComponent(location.query)}`)
     .then(res => res.json())
     .then(data => {
       const windKnots = Math.round(data.wind.speed * 0.869);
@@ -53,9 +55,38 @@ function loadWeather(locationName) {
       document.getElementById("desc").textContent = data.weather[0].description;
 
       document.getElementById("kiteMeter").style.background = getKiteColor(windKnots);
-      document.getElementById("surfMeter").style.background = getSurfColor(windKnots);
 
       map.setView(location.coords, 13.3);
+
+      loadMarineData(lat, lng);
+    });
+}
+
+function loadMarineData(lat, lng) {
+  fetch(`/api/marine?lat=${lat}&lng=${lng}`)
+    .then(res => res.json())
+    .then(data => {
+      const current = data.hours[0];
+
+      const waveHeightMeters =
+        current.waveHeight?.noaa ??
+        current.waveHeight?.sg ??
+        current.swellHeight?.noaa ??
+        current.swellHeight?.sg ??
+        0;
+
+      const swellPeriod =
+        current.swellPeriod?.noaa ??
+        current.swellPeriod?.sg ??
+        0;
+
+      const waveHeightFeet = waveHeightMeters * 3.281;
+
+      document.getElementById("surfMeter").style.background =
+        getSurfColor(waveHeightFeet, swellPeriod);
+
+      document.getElementById("desc").textContent +=
+        ` | Waves: ${waveHeightFeet.toFixed(1)} ft | Period: ${Math.round(swellPeriod)}s`;
     });
 }
 
@@ -110,11 +141,13 @@ function getKiteColor(windKnots) {
   }
 }
 
-function getSurfColor(windKnots) {
-  if (windKnots <= 6) {
+function getSurfColor(waveHeightFeet, swellPeriod) {
+  if (waveHeightFeet >= 3 && waveHeightFeet <= 8 && swellPeriod >= 9) {
     return "#22c55e";
-  } else if (windKnots <= 12) {
+  } else if (waveHeightFeet >= 2 && swellPeriod >= 6) {
     return "#eab308";
+  } else if (waveHeightFeet > 8) {
+    return "#ad005f";
   } else {
     return "#ef4444";
   }
