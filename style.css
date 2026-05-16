@@ -21,6 +21,20 @@ body {
   min-height: 250px;
   backdrop-filter: blur(10px);
   overflow: hidden;
+
+  box-shadow:
+    0 8px 30px rgba(0,0,0,0.25);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.card:hover,
+.map-card:hover {
+  transform: translateY(-2px);
+
+  background: rgba(255, 255, 255, 0.13);
 }
 
 .card {
@@ -31,6 +45,13 @@ body {
 .map-card {
   height: 350px;
   padding: 0;
+
+  resize: both;
+
+  min-width: 320px;
+  min-height: 300px;
+
+  max-width: 100%;
 }
 
 #map {
@@ -52,6 +73,15 @@ body {
   padding: 8px 10px;
   font-size: 18px;
   cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.locate-btn:hover {
+  background: #1f2937;
+  transform: scale(1.05);
 }
 
 .side-meter {
@@ -68,6 +98,7 @@ body {
   color: white;
   font-weight: bold;
   letter-spacing: 1px;
+
   transition: background 0.4s ease;
 }
 
@@ -92,28 +123,57 @@ body {
 
 #locationSelect {
   flex: 1;
+
   background: #111827;
   color: white;
+
   border: none;
   border-radius: 12px;
+
   padding: 10px;
   font-size: 15px;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+#locationSelect:hover {
+  background: #1f2937;
+}
+
+#favoriteBtn,
+#radarBtn {
+  background: #111827;
+  color: white;
+
+  border: none;
+  border-radius: 12px;
+
+  padding: 10px 14px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 #favoriteBtn {
-  background: #111827;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 10px 14px;
   font-size: 20px;
-  cursor: pointer;
+}
+
+#favoriteBtn:hover,
+#radarBtn:hover {
+  background: #1f2937;
+  transform: scale(1.05);
 }
 
 .weather-main {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+
   margin-top: 18px;
 }
 
@@ -122,7 +182,24 @@ body {
   margin: 0;
 }
 
+.wind-card canvas {
+  width: 100%;
+  height: 180px;
+}
+
+.surf-card,
+.kite-card,
+.wind-card,
+.tide-card {
+  min-height: 200px;
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
 @media (max-width: 700px) {
+
   .page {
     grid-template-columns: 1fr;
     padding: 20px 85px;
@@ -135,19 +212,12 @@ body {
 
   .map-card {
     height: 300px;
+
+    resize: vertical;
   }
 
   .weather-main {
     flex-direction: column;
     gap: 8px;
   }
-}
-
-#radarBtn {
-  background: #111827;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 10px 14px;
-  cursor: pointer;
 }

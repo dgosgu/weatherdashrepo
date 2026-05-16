@@ -361,4 +361,10 @@ function getSurfColor(
   }
 }
 
+const mapCard = document.querySelector(".map-card");
+
+new ResizeObserver(() => {
+  map.invalidateSize();
+}).observe(mapCard);
+
 loadWeather("Dorado");
