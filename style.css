@@ -4,8 +4,10 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 100vh;
+  align-items: flex-start;   /* moves card to top */
+  min-height: 100vh;
+  padding-top: 8px;          /* minimal top space */
+  margin: 0;                 /* remove default browser margin */
 }
 
 .card {
