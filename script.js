@@ -21,13 +21,19 @@ const locations = {
   }
 };
 
-const map = L.map("map").setView(locations["Dorado"].coords, 13.3);
-const stadiaLayer = fetch("/api/mapstyle")
+const map = L.map("map").setView(
+  locations["Dorado"].coords,
+  13.3
+);
+
+let fallbackLoaded = false;
+
+fetch("/api/mapstyle")
   .then(res => res.json())
   .then(data => {
+
     const layer = L.tileLayer(data.url, {
       maxZoom: 20,
-      errorTileUrl: "",
       attribution:
         '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> ' +
         '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' +
@@ -35,22 +41,43 @@ const stadiaLayer = fetch("/api/mapstyle")
     });
 
     layer.on("tileerror", function() {
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        maxZoom: 20,
-        attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
-      }).addTo(map);
+
+      if (fallbackLoaded) return;
+
+      fallbackLoaded = true;
+
+      console.log("Stadia failed — loading CARTO fallback");
+
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        {
+          maxZoom: 20,
+          attribution:
+            "&copy; OpenStreetMap contributors &copy; CARTO"
+        }
+      ).addTo(map);
     });
 
     layer.addTo(map);
   });
 
 const spots = [
-  { name: "GoodWinds", coords: [18.474611640654814, -66.29507660865785] },
-  { name: "Goyu / TV Station", coords: [18.47845809395691, -66.2766605615616] },
-  { name: "Ollo 13 / Breñas", coords: [18.477883166606762, -66.30981266498567] }
+  {
+    name: "GoodWinds",
+    coords: [18.474611640654814, -66.29507660865785]
+  },
+  {
+    name: "Goyu / TV Station",
+    coords: [18.47845809395691, -66.2766605615616]
+  },
+  {
+    name: "Ollo 13 / Breñas",
+    coords: [18.477883166606762, -66.30981266498567]
+  }
 ];
 
 spots.forEach(spot => {
+
   L.marker(spot.coords)
     .addTo(map)
     .bindPopup(
@@ -59,17 +86,23 @@ spots.forEach(spot => {
 });
 
 function loadWeather(locationName) {
+
   const location = locations[locationName];
+
   const lat = location.coords[0];
   const lng = location.coords[1];
 
-  fetch(`/api/weather?query=${encodeURIComponent(location.query)}`)
+  fetch(
+    `/api/weather?query=${encodeURIComponent(location.query)}`
+  )
     .then(res => res.json())
     .then(data => {
 
-      const windKnots = Math.round(data.wind.speed * 0.869);
+      const windKnots =
+        Math.round(data.wind.speed * 0.869);
 
-      document.getElementById("city").textContent = locationName;
+      document.getElementById("city").textContent =
+        locationName;
 
       document.getElementById("temp").textContent =
         Math.round(data.main.temp) + "°F";
@@ -95,6 +128,11 @@ function loadMarineData(lat, lng) {
     .then(res => res.json())
     .then(data => {
 
+      if (!data.hours || !data.hours.length) {
+        console.log("No marine data");
+        return;
+      }
+
       const current = data.hours[0];
 
       const waveHeightMeters =
@@ -109,33 +147,47 @@ function loadMarineData(lat, lng) {
         current.swellPeriod?.sg ??
         0;
 
-      const waveHeightFeet = waveHeightMeters * 3.281;
+      const waveHeightFeet =
+        waveHeightMeters * 3.281;
 
       document.getElementById("surfMeter").style.background =
-        getSurfColor(waveHeightFeet, swellPeriod);
+        getSurfColor(
+          waveHeightFeet,
+          swellPeriod
+        );
 
       document.getElementById("desc").textContent +=
         ` | Waves: ${waveHeightFeet.toFixed(1)} ft | Period: ${Math.round(swellPeriod)}s`;
+    })
+    .catch(error => {
+      console.log("Marine fetch error:", error);
     });
 }
 
-document.getElementById("locationSelect")
+document
+  .getElementById("locationSelect")
   .addEventListener("change", function() {
+
     loadWeather(this.value);
   });
 
-document.getElementById("favoriteBtn")
+document
+  .getElementById("favoriteBtn")
   .addEventListener("click", function() {
 
     this.textContent =
-      this.textContent === "☆" ? "★" : "☆";
+      this.textContent === "☆"
+        ? "★"
+        : "☆";
   });
 
 map.on("click", function(e) {
 
   alert(
-    "Lat: " + e.latlng.lat +
-    "\nLng: " + e.latlng.lng
+    "Lat: " +
+    e.latlng.lat +
+    "\nLng: " +
+    e.latlng.lng
   );
 });
 
@@ -146,11 +198,15 @@ const locateControl = L.control({
 locateControl.onAdd = function() {
 
   const button =
-    L.DomUtil.create("button", "locate-btn");
+    L.DomUtil.create(
+      "button",
+      "locate-btn"
+    );
 
   button.innerHTML = "📍";
 
-  button.title = "Find my location";
+  button.title =
+    "Find my location";
 
   L.DomEvent.disableClickPropagation(button);
 
@@ -177,19 +233,30 @@ map.on("locationfound", function(e) {
 
 function getKiteColor(windKnots) {
 
-  if (windKnots >= 16 && windKnots <= 25) {
+  if (
+    windKnots >= 16 &&
+    windKnots <= 25
+  ) {
 
     return "#22c55e";
 
-  } else if (windKnots >= 10 && windKnots < 16) {
+  } else if (
+    windKnots >= 10 &&
+    windKnots < 16
+  ) {
 
     return "#eab308";
 
-  } else if (windKnots > 25 && windKnots <= 32) {
+  } else if (
+    windKnots > 25 &&
+    windKnots <= 32
+  ) {
 
     return "#eab308";
 
-  } else if (windKnots > 32) {
+  } else if (
+    windKnots > 32
+  ) {
 
     return "#ad005f";
 
@@ -199,7 +266,10 @@ function getKiteColor(windKnots) {
   }
 }
 
-function getSurfColor(waveHeightFeet, swellPeriod) {
+function getSurfColor(
+  waveHeightFeet,
+  swellPeriod
+) {
 
   if (
     waveHeightFeet >= 3 &&
@@ -216,7 +286,9 @@ function getSurfColor(waveHeightFeet, swellPeriod) {
 
     return "#eab308";
 
-  } else if (waveHeightFeet > 8) {
+  } else if (
+    waveHeightFeet > 8
+  ) {
 
     return "#ad005f";
 
