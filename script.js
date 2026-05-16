@@ -19,8 +19,8 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
 
 const spots = [
   { name: "GoodWinds", coords: [18.474611640654814,-66.29507660865785]},
-  { name: "Dorado Beach", coords: [18.4729, -66.2781]},
-  { name: "Breñas", coords: [18.477883166606762,-66.30981266498567]}
+  { name: "Goyu / TV Station", coords: [18.4729, -66.2781]},
+  { name: "Ollo 13 / Breñas", coords: [18.477883166606762,-66.30981266498567]}
 ];
 
 spots.forEach(spot => {
