@@ -23,9 +23,9 @@ const locations = {
 
 const map = L.map("map").setView(locations["Dorado"].coords, 13.3);
 
-L.tileLayer("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png", {
+L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
   maxZoom: 20,
-  attribution: "&copy; OpenStreetMap contributors &copy; Stadia Maps"
+  attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
 }).addTo(map);
 
 const spots = [
