@@ -7,32 +7,30 @@ body {
 }
 
 .page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 20px;
-  padding: 40px 20px;
+  padding: 40px 100px;
 }
 
 .card,
 .map-card {
   background: rgba(255, 255, 255, 0.1);
-  padding: 30px;
   border-radius: 20px;
-  width: 90%;
-  max-width: 600px;
+  width: 100%;
+  min-height: 250px;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.card {
+  padding: 30px;
+  box-sizing: border-box;
 }
 
 .map-card {
-  width: 90%;
-  max-width: 600px;
   height: 350px;
-
-  background: rgba(255,255,255,0.1);
-  border-radius: 20px;
-
-  overflow: hidden;
-  backdrop-filter: blur(10px);
+  padding: 0;
 }
 
 #map {
@@ -44,13 +42,6 @@ body {
 .leaflet-popup-tip {
   background: #111827;
   color: white;
-}
-
-.beach-icon {
-  font-size: 28px;
-  text-align: center;
-  line-height: 35px;
-  filter: drop-shadow(0 2px 5px black);
 }
 
 .locate-btn {
@@ -129,4 +120,25 @@ body {
 .weather-main h1,
 .weather-main h2 {
   margin: 0;
+}
+
+@media (max-width: 700px) {
+  .page {
+    grid-template-columns: 1fr;
+    padding: 20px 85px;
+  }
+
+  .side-meter {
+    width: 45px;
+    font-size: 12px;
+  }
+
+  .map-card {
+    height: 300px;
+  }
+
+  .weather-main {
+    flex-direction: column;
+    gap: 8px;
+  }
 }
