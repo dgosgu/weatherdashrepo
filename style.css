@@ -239,6 +239,15 @@ body {
     cursor: pointer;
   }
 
+  .placeholder-card {
+    min-height: 250px;
+  }
+
+  .map-card.expanded {
+    grid-column: 1 / -1;
+    height: 75vh;
+  }
+
   .weather-main {
     flex-direction: column;
     gap: 8px;
