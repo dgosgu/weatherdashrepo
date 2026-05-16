@@ -11,7 +11,7 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=Dorado&units=imperial&a
     document.getElementById("desc").textContent = data.weather[0].description;
   });
 
-const map = L.map("map").setView(BARLOVENTO, 13.5);
+const map = L.map("map").setView(BARLOVENTO, 13.3);
 
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors"
@@ -19,7 +19,7 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
 
 const spots = [
   { name: "GoodWinds", coords: [18.474611640654814,-66.29507660865785]},
-  { name: "Goyu / TV Station", coords: [18.4729, -66.2781]},
+  { name: "Goyu / TV Station", coords: [18.47845809395691,-66.2766605615616]},
   { name: "Ollo 13 / Breñas", coords: [18.477883166606762,-66.30981266498567]}
 ];
 
