@@ -23,10 +23,16 @@ const locations = {
 
 const map = L.map("map").setView(locations["Dorado"].coords, 13.3);
 
-L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-  maxZoom: 20,
-  attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
-}).addTo(map);
+L.tileLayer(
+  "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png",
+  {
+    maxZoom: 20,
+    attribution:
+      '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> ' +
+      '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' +
+      '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+  }
+).addTo(map);
 
 const spots = [
   { name: "GoodWinds", coords: [18.474611640654814, -66.29507660865785] },
