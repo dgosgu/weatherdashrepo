@@ -367,4 +367,18 @@ new ResizeObserver(() => {
   map.invalidateSize();
 }).observe(mapCard);
 
+document.getElementById("resizeMapBtn").addEventListener("click", function() {
+  const mapCard = document.querySelector(".map-card");
+
+  mapCard.classList.toggle("expanded");
+
+  this.textContent = mapCard.classList.contains("expanded")
+    ? "Shrink"
+    : "Expand";
+
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 250);
+});
+
 loadWeather("Dorado");
