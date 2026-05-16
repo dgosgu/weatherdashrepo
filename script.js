@@ -123,13 +123,14 @@ function loadWeather(locationName) {
 }
 
 function loadMarineData(lat, lng) {
-
   fetch(`/api/marine?lat=${lat}&lng=${lng}`)
     .then(res => res.json())
     .then(data => {
+      console.log("Marine data:", data);
 
       if (!data.hours || !data.hours.length) {
-        console.log("No marine data");
+        console.log("No marine data:", data);
+        document.getElementById("surfMeter").style.background = "#6b7280";
         return;
       }
 
@@ -147,20 +148,17 @@ function loadMarineData(lat, lng) {
         current.swellPeriod?.sg ??
         0;
 
-      const waveHeightFeet =
-        waveHeightMeters * 3.281;
+      const waveHeightFeet = waveHeightMeters * 3.281;
 
       document.getElementById("surfMeter").style.background =
-        getSurfColor(
-          waveHeightFeet,
-          swellPeriod
-        );
+        getSurfColor(waveHeightFeet, swellPeriod);
 
       document.getElementById("desc").textContent +=
         ` | Waves: ${waveHeightFeet.toFixed(1)} ft | Period: ${Math.round(swellPeriod)}s`;
     })
     .catch(error => {
       console.log("Marine fetch error:", error);
+      document.getElementById("surfMeter").style.background = "#6b7280";
     });
 }
 

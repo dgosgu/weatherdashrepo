@@ -3,7 +3,7 @@ export default async function handler(req, res) {
 
   const url =
     `https://api.stormglass.io/v2/weather/point?lat=${lat}` +
-    `&lng=${lng}&params=waveHeight,swellPeriod,swellHeight`;
+    `&lng=${lng}&params=waveHeight,swellPeriod`;
 
   const response = await fetch(url, {
     headers: {
