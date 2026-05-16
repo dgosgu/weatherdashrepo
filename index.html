@@ -10,10 +10,25 @@
 <body>
   <div class="page">
     <div class="card">
-      <h1 id="city">Loading...</h1>
-      <h2 id="temp"></h2>
-      <p id="wind"></p>
-      <p id="desc"></p>
+      <div class="top-row">
+        <select id="locationSelect">
+          <option value="Dorado" selected>Dorado</option>
+          <option value="San Juan">San Juan</option>
+          <option value="Rincon">Rincón</option>
+          <option value="Fajardo">Fajardo</option>
+          <option value="Midway, Utah">Midway, Utah</option>
+        </select>
+
+        <button id="favoriteBtn">☆</button>
+      </div>
+
+      <div class="weather-main">
+        <h1 id="city">Dorado</h1>
+        <h2 id="temp">--°F</h2>
+      </div>
+
+      <p id="wind">Wind: -- knots</p>
+      <p id="desc">Loading...</p>
     </div>
 
     <div class="map-card">
