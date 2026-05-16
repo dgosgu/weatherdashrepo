@@ -62,39 +62,66 @@ fetch("/api/mapstyle")
   });
 
 
-let radarLayer = null;
+let radarLayers = [];
 let radarOn = false;
+let radarFrameIndex = 0;
+let radarInterval = null;
 
-function loadRadarLayer() {
+function loadRadarAnimation() {
   fetch("https://api.rainviewer.com/public/weather-maps.json")
     .then(res => res.json())
     .then(data => {
       const frames = data.radar.past;
-      const latestFrame = frames[frames.length - 1];
 
-      const radarUrl =
-        data.host +
-        latestFrame.path +
-        "/256/{z}/{x}/{y}/2/1_1.png";
+      radarLayers = frames.map(frame => {
+        const radarUrl =
+          data.host +
+          frame.path +
+          "/256/{z}/{x}/{y}/2/1_1.png";
 
-      radarLayer = L.tileLayer(radarUrl, {
-        opacity: 0.65,
-        zIndex: 500,
-        attribution: "Radar data © RainViewer"
+        return L.tileLayer(radarUrl, {
+          opacity: 0,
+          zIndex: 500,
+          maxNativeZoom: 7,
+          maxZoom: 20,
+          attribution: "Radar data © RainViewer"
+        }).addTo(map);
       });
 
-      radarLayer.addTo(map);
+      radarFrameIndex = 0;
+      radarLayers[radarFrameIndex].setOpacity(0.65);
+
+      radarInterval = setInterval(() => {
+        radarLayers[radarFrameIndex].setOpacity(0);
+
+        radarFrameIndex =
+          (radarFrameIndex + 1) % radarLayers.length;
+
+        radarLayers[radarFrameIndex].setOpacity(0.65);
+      }, 700);
+
       radarOn = true;
     });
 }
 
+function turnOffRadar() {
+  radarLayers.forEach(layer => {
+    map.removeLayer(layer);
+  });
+
+  radarLayers = [];
+  radarOn = false;
+
+  clearInterval(radarInterval);
+  radarInterval = null;
+}
+
 document.getElementById("radarBtn").addEventListener("click", function() {
-  if (radarOn && radarLayer) {
-    map.removeLayer(radarLayer);
-    radarOn = false;
+  if (radarOn) {
+    turnOffRadar();
     this.textContent = "Radar";
   } else {
-    loadRadarLayer();
+    loadRadarAnimation();
     this.textContent = "Radar On";
   }
 });
