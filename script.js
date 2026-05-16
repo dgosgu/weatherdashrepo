@@ -7,11 +7,18 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=Dorado&units=imperial&a
     document.getElementById("city").textContent = data.name;
     document.getElementById("temp").textContent = Math.round(data.main.temp) + "°F";
     document.getElementById("wind").textContent =
-      "Wind: " + Math.round(data.wind.speed * 0.869) + " knots";
+      "Wind: " + windKnots + " knots";
     document.getElementById("desc").textContent = data.weather[0].description;
   });
 
 const map = L.map("map").setView(BARLOVENTO, 13.3);
+const windKnots = Math.round(data.wind.speed * 0.869);
+
+document.getElementById("kiteMeter").style.background =
+  getKiteColor(windKnots);
+
+document.getElementById("surfMeter").style.background =
+  getSurfColor(windKnots);
 
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors"
@@ -59,3 +66,27 @@ map.on("locationfound", function(e) {
     .bindPopup("You are here")
     .openPopup();
 });
+
+function getKiteColor(windKnots) {
+  if (windKnots >= 16 && windKnots <= 25) {
+    return "#22c55e"; // green
+  } else if (windKnots >= 10 && windKnots < 16) {
+    return "#eab308"; // yellow
+  } else if (windKnots > 25 && windKnots <= 32) {
+    return "#eab308"; // yellow
+  } else if (windKnots > 32) {
+    return "#ad005fff"; // red
+  } else {
+    return "#ef4444"; // red
+  }
+}
+
+function getSurfColor(windKnots) {
+  if (windKnots <= 6) {
+    return "#22c55e"; // green
+  } else if (windKnots <= 12) {
+    return "#eab308"; // yellow
+  } else {
+    return "#ef4444"; // red
+  }
+}
