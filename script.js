@@ -381,4 +381,17 @@ document.getElementById("resizeMapBtn").addEventListener("click", function() {
   }, 250);
 });
 
+new Sortable(document.querySelector(".page"), {
+  animation: 200,
+  ghostClass: "sortable-ghost",
+  chosenClass: "sortable-chosen",
+  dragClass: "sortable-drag",
+
+  onEnd: function() {
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 250);
+  }
+});
+
 loadWeather("Dorado");

@@ -241,6 +241,28 @@ body {
   margin-top: 0;
 }
 
+.card,
+.map-card {
+  cursor: grab;
+}
+
+.card:active,
+.map-card:active {
+  cursor: grabbing;
+}
+
+.sortable-ghost {
+  opacity: 0.35;
+}
+
+.sortable-chosen {
+  transform: scale(1.02);
+}
+
+.sortable-drag {
+  opacity: 0.9;
+}
+
 @media (max-width: 700px) {
 
   .page {
