@@ -188,42 +188,63 @@ function loadWeather(locationName) {
 }
 
 function loadMarineData(lat, lng) {
+
+  const cacheKey = `marine-${lat}-${lng}`;
+
+  const cached = localStorage.getItem(cacheKey);
+
+  if (cached) {
+
+    const parsed = JSON.parse(cached);
+
+    const age =
+      Date.now() - parsed.timestamp;
+
+    const thirtyMinutes =
+      1000 * 60 * 30;
+
+    if (age < thirtyMinutes) {
+
+      console.log("Using cached marine data");
+
+      applyMarineData(parsed.data);
+
+      return;
+    }
+  }
+
   fetch(`/api/marine?lat=${lat}&lng=${lng}`)
     .then(res => res.json())
     .then(data => {
-      console.log("Marine data:", data);
+
+      console.log("Fresh marine data:", data);
 
       if (!data.hours || !data.hours.length) {
+
         console.log("No marine data:", data);
-        document.getElementById("surfMeter").style.background = "#6b7280";
+
+        document.getElementById("surfMeter").style.background =
+          "#6b7280";
+
         return;
       }
 
-      const current = data.hours[0];
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          timestamp: Date.now(),
+          data: data
+        })
+      );
 
-      const waveHeightMeters =
-        current.waveHeight?.noaa ??
-        current.waveHeight?.sg ??
-        current.swellHeight?.noaa ??
-        current.swellHeight?.sg ??
-        0;
-
-      const swellPeriod =
-        current.swellPeriod?.noaa ??
-        current.swellPeriod?.sg ??
-        0;
-
-      const waveHeightFeet = waveHeightMeters * 3.281;
-
-      document.getElementById("surfMeter").style.background =
-        getSurfColor(waveHeightFeet, swellPeriod);
-
-      document.getElementById("desc").textContent +=
-        ` | Waves: ${waveHeightFeet.toFixed(1)} ft | Period: ${Math.round(swellPeriod)}s`;
+      applyMarineData(data);
     })
     .catch(error => {
+
       console.log("Marine fetch error:", error);
-      document.getElementById("surfMeter").style.background = "#6b7280";
+
+      document.getElementById("surfMeter").style.background =
+        "#6b7280";
     });
 }
 
