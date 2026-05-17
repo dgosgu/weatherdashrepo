@@ -1,37 +1,34 @@
 const locations = {
-  "Dorado": {
-    query: "Dorado",
-    coords: [18.474611640654814, -66.29507660865785]
-  },
-  "San Juan": {
-    query: "San Juan,PR",
-    coords: [18.4655, -66.1057]
-  },
-  "Rincon": {
-    query: "Rincon,PR",
-    coords: [18.3402, -67.2499]
-  },
-  "Fajardo": {
-    query: "Fajardo,PR",
-    coords: [18.3258, -65.6524]
-  },
-  "Midway, Utah": {
-    query: "Midway,US",
-    coords: [40.5122, -111.4744]
-  }
+  "GoodWinds": { query: "Dorado,PR", coords: [18.474611640654814, -66.29507660865785] },
+  "Goyu": { query: "Dorado,PR", coords: [18.47845809395691, -66.2766605615616] },
+  "Ollo 13": { query: "Dorado,PR", coords: [18.477883166606762, -66.30981266498567] },
+  "Vega Baja": { query: "Vega Baja,PR", coords: [18.4886, -66.3977] },
+
+  "Isla Verde": { query: "Carolina,PR", coords: [18.4436, -66.0197] },
+  "Ocean Park": { query: "San Juan,PR", coords: [18.4525, -66.0474] },
+  "Pine Grove": { query: "Carolina,PR", coords: [18.4439, -66.0138] },
+  "Escambron": { query: "San Juan,PR", coords: [18.4671, -66.0887] },
+
+  "Luquillo": { query: "Luquillo,PR", coords: [18.3808, -65.7202] },
+  "Fajardo": { query: "Fajardo,PR", coords: [18.3258, -65.6524] },
+  "Seven Seas": { query: "Fajardo,PR", coords: [18.3685, -65.6367] },
+
+  "Rincon": { query: "Rincon,PR", coords: [18.3402, -67.2499] },
+  "Domes": { query: "Rincon,PR", coords: [18.3657, -67.2706] },
+  "Maria's": { query: "Rincon,PR", coords: [18.3569, -67.2684] },
+  "Sandy Beach": { query: "Rincon,PR", coords: [18.3712, -67.2546] },
+  "Jobos": { query: "Isabela,PR", coords: [18.5121, -67.0765] },
+
+  "La Parguera": { query: "Lajas,PR", coords: [17.9745, -67.0466] }
 };
 
-const map = L.map("map").setView(
-  locations["Dorado"].coords,
-  13.3
-);
+const map = L.map("map").setView(locations["GoodWinds"].coords, 13.3);
 
 let fallbackLoaded = false;
 
 fetch("/api/mapstyle")
   .then(res => res.json())
   .then(data => {
-
     const layer = L.tileLayer(data.url, {
       maxZoom: 20,
       attribution:
@@ -41,26 +38,17 @@ fetch("/api/mapstyle")
     });
 
     layer.on("tileerror", function() {
-
       if (fallbackLoaded) return;
-
       fallbackLoaded = true;
 
-      console.log("Stadia failed — loading CARTO fallback");
-
-      L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-        {
-          maxZoom: 20,
-          attribution:
-            "&copy; OpenStreetMap contributors &copy; CARTO"
-        }
-      ).addTo(map);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        maxZoom: 20,
+        attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
+      }).addTo(map);
     });
 
     layer.addTo(map);
   });
-
 
 let radarLayers = [];
 let radarOn = false;
@@ -74,10 +62,7 @@ function loadRadarAnimation() {
       const frames = data.radar.past;
 
       radarLayers = frames.map(frame => {
-        const radarUrl =
-          data.host +
-          frame.path +
-          "/256/{z}/{x}/{y}/2/1_1.png";
+        const radarUrl = data.host + frame.path + "/256/{z}/{x}/{y}/2/1_1.png";
 
         return L.tileLayer(radarUrl, {
           opacity: 0,
@@ -93,10 +78,7 @@ function loadRadarAnimation() {
 
       radarInterval = setInterval(() => {
         radarLayers[radarFrameIndex].setOpacity(0);
-
-        radarFrameIndex =
-          (radarFrameIndex + 1) % radarLayers.length;
-
+        radarFrameIndex = (radarFrameIndex + 1) % radarLayers.length;
         radarLayers[radarFrameIndex].setOpacity(0.65);
       }, 700);
 
@@ -105,13 +87,9 @@ function loadRadarAnimation() {
 }
 
 function turnOffRadar() {
-  radarLayers.forEach(layer => {
-    map.removeLayer(layer);
-  });
-
+  radarLayers.forEach(layer => map.removeLayer(layer));
   radarLayers = [];
   radarOn = false;
-
   clearInterval(radarInterval);
   radarInterval = null;
 }
@@ -126,89 +104,44 @@ document.getElementById("radarBtn").addEventListener("click", function() {
   }
 });
 
-const spots = [
-  {
-    name: "GoodWinds",
-    coords: [18.474611640654814, -66.29507660865785]
-  },
-  {
-    name: "Goyu / TV Station",
-    coords: [18.47845809395691, -66.2766605615616]
-  },
-  {
-    name: "Ollo 13 / Breñas",
-    coords: [18.477883166606762, -66.30981266498567]
-  }
-];
-
-spots.forEach(spot => {
-
+Object.entries(locations).forEach(([name, spot]) => {
   L.marker(spot.coords)
     .addTo(map)
-    .bindPopup(
-      `<b>${spot.name}</b><br>${spot.coords[0]}, ${spot.coords[1]}`
-    );
+    .bindPopup(`<b>${name}</b><br>${spot.coords[0]}, ${spot.coords[1]}`);
 });
 
 function loadWeather(locationName) {
-
   const location = locations[locationName];
-
   const lat = location.coords[0];
   const lng = location.coords[1];
 
-  fetch(
-    `/api/weather?query=${encodeURIComponent(location.query)}`
-  )
+  fetch(`/api/weather?query=${encodeURIComponent(location.query)}`)
     .then(res => res.json())
     .then(data => {
+      const windKnots = Math.round(data.wind.speed * 0.869);
 
-      const windKnots =
-        Math.round(data.wind.speed * 0.869);
-
-      document.getElementById("city").textContent =
-        locationName;
-
-      document.getElementById("temp").textContent =
-        Math.round(data.main.temp) + "°F";
-
-      document.getElementById("wind").textContent =
-        "Wind: " + windKnots + " knots";
-
-      document.getElementById("desc").textContent =
-        data.weather[0].description;
-
-      document.getElementById("kiteMeter").style.background =
-        getKiteColor(windKnots);
+      document.getElementById("city").textContent = locationName;
+      document.getElementById("temp").textContent = Math.round(data.main.temp) + "°F";
+      document.getElementById("wind").textContent = "Wind: " + windKnots + " knots";
+      document.getElementById("desc").textContent = data.weather[0].description;
+      document.getElementById("kiteMeter").style.background = getKiteColor(windKnots);
 
       map.setView(location.coords, 13.3);
-
       loadMarineData(lat, lng);
     });
 }
 
 function loadMarineData(lat, lng) {
-
   const cacheKey = `marine-${lat}-${lng}`;
-
   const cached = localStorage.getItem(cacheKey);
 
   if (cached) {
-
     const parsed = JSON.parse(cached);
-
-    const age =
-      Date.now() - parsed.timestamp;
-
-    const thirtyMinutes =
-      1000 * 60 * 30;
+    const age = Date.now() - parsed.timestamp;
+    const thirtyMinutes = 1000 * 60 * 30;
 
     if (age < thirtyMinutes) {
-
-      console.log("Using cached marine data");
-
       applyMarineData(parsed.data);
-
       return;
     }
   }
@@ -216,35 +149,20 @@ function loadMarineData(lat, lng) {
   fetch(`/api/marine?lat=${lat}&lng=${lng}`)
     .then(res => res.json())
     .then(data => {
-
-      console.log("Fresh marine data:", data);
-
       if (!data.hours || !data.hours.length) {
-
-        console.log("No marine data:", data);
-
-        document.getElementById("surfMeter").style.background =
-          "#6b7280";
-
+        document.getElementById("surfMeter").style.background = "#6b7280";
         return;
       }
 
-      localStorage.setItem(
-        cacheKey,
-        JSON.stringify({
-          timestamp: Date.now(),
-          data: data
-        })
-      );
+      localStorage.setItem(cacheKey, JSON.stringify({
+        timestamp: Date.now(),
+        data: data
+      }));
 
       applyMarineData(data);
     })
-    .catch(error => {
-
-      console.log("Marine fetch error:", error);
-
-      document.getElementById("surfMeter").style.background =
-        "#6b7280";
+    .catch(() => {
+      document.getElementById("surfMeter").style.background = "#6b7280";
     });
 }
 
@@ -272,58 +190,29 @@ function applyMarineData(data) {
     ` | Waves: ${waveHeightFeet.toFixed(1)} ft | Period: ${Math.round(swellPeriod)}s`;
 }
 
-document
-  .getElementById("locationSelect")
-  .addEventListener("change", function() {
+document.getElementById("locationSelect").addEventListener("change", function() {
+  loadWeather(this.value);
+});
 
-    loadWeather(this.value);
-  });
-
-document
-  .getElementById("favoriteBtn")
-  .addEventListener("click", function() {
-
-    this.textContent =
-      this.textContent === "☆"
-        ? "★"
-        : "☆";
-  });
+document.getElementById("favoriteBtn").addEventListener("click", function() {
+  this.textContent = this.textContent === "☆" ? "★" : "☆";
+});
 
 map.on("click", function(e) {
-
-  alert(
-    "Lat: " +
-    e.latlng.lat +
-    "\nLng: " +
-    e.latlng.lng
-  );
+  alert("Lat: " + e.latlng.lat + "\nLng: " + e.latlng.lng);
 });
 
-const locateControl = L.control({
-  position: "topright"
-});
+const locateControl = L.control({ position: "topright" });
 
 locateControl.onAdd = function() {
-
-  const button =
-    L.DomUtil.create(
-      "button",
-      "locate-btn"
-    );
-
+  const button = L.DomUtil.create("button", "locate-btn");
   button.innerHTML = "📍";
-
-  button.title =
-    "Find my location";
+  button.title = "Find my location";
 
   L.DomEvent.disableClickPropagation(button);
 
   button.onclick = function() {
-
-    map.locate({
-      setView: true,
-      maxZoom: 16
-    });
+    map.locate({ setView: true, maxZoom: 16 });
   };
 
   return button;
@@ -332,7 +221,6 @@ locateControl.onAdd = function() {
 locateControl.addTo(map);
 
 map.on("locationfound", function(e) {
-
   L.marker(e.latlng)
     .addTo(map)
     .bindPopup("You are here")
@@ -340,77 +228,23 @@ map.on("locationfound", function(e) {
 });
 
 function getKiteColor(windKnots) {
-
-  if (
-    windKnots >= 16 &&
-    windKnots <= 25
-  ) {
-
-    return "#22c55e";
-
-  } else if (
-    windKnots >= 10 &&
-    windKnots < 16
-  ) {
-
-    return "#eab308";
-
-  } else if (
-    windKnots > 25 &&
-    windKnots <= 32
-  ) {
-
-    return "#eab308";
-
-  } else if (
-    windKnots > 32
-  ) {
-
-    return "#ad005f";
-
-  } else {
-
-    return "#ef4444";
-  }
+  if (windKnots >= 16 && windKnots <= 25) return "#22c55e";
+  if (windKnots >= 10 && windKnots < 16) return "#eab308";
+  if (windKnots > 25 && windKnots <= 32) return "#eab308";
+  if (windKnots > 32) return "#ad005f";
+  return "#ef4444";
 }
 
-function getSurfColor(
-  waveHeightFeet,
-  swellPeriod
-) {
-
-  if (
-    waveHeightFeet >= 3 &&
-    waveHeightFeet <= 8 &&
-    swellPeriod >= 9
-  ) {
-
-    return "#22c55e";
-
-  } else if (
-    waveHeightFeet >= 2 &&
-    swellPeriod >= 6
-  ) {
-
-    return "#eab308";
-
-  } else if (
-    waveHeightFeet > 8
-  ) {
-
-    return "#ad005f";
-
-  } else {
-
-    return "#ef4444";
-  }
+function getSurfColor(waveHeightFeet, swellPeriod) {
+  if (waveHeightFeet >= 3 && waveHeightFeet <= 8 && swellPeriod >= 9) return "#22c55e";
+  if (waveHeightFeet >= 2 && swellPeriod >= 6) return "#eab308";
+  if (waveHeightFeet > 8) return "#ad005f";
+  return "#ef4444";
 }
-
-const mapCard = document.querySelector(".map-card");
 
 new ResizeObserver(() => {
   map.invalidateSize();
-}).observe(mapCard);
+}).observe(document.querySelector(".map-card"));
 
 document.getElementById("resizeMapBtn").addEventListener("click", function() {
   const mapCard = document.querySelector(".map-card");
@@ -431,7 +265,6 @@ const sortable = new Sortable(document.querySelector(".page"), {
   ghostClass: "sortable-ghost",
   chosenClass: "sortable-chosen",
   dragClass: "sortable-drag",
-
   disabled: window.innerWidth <= 700,
 
   onEnd: function() {
@@ -449,4 +282,4 @@ window.addEventListener("resize", function() {
   }, 250);
 });
 
-loadWeather("Dorado");
+loadWeather("GoodWinds");
