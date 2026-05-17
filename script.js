@@ -248,6 +248,30 @@ function loadMarineData(lat, lng) {
     });
 }
 
+function applyMarineData(data) {
+  const current = data.hours[0];
+
+  const waveHeightMeters =
+    current.waveHeight?.noaa ??
+    current.waveHeight?.sg ??
+    current.swellHeight?.noaa ??
+    current.swellHeight?.sg ??
+    0;
+
+  const swellPeriod =
+    current.swellPeriod?.noaa ??
+    current.swellPeriod?.sg ??
+    0;
+
+  const waveHeightFeet = waveHeightMeters * 3.281;
+
+  document.getElementById("surfMeter").style.background =
+    getSurfColor(waveHeightFeet, swellPeriod);
+
+  document.getElementById("desc").textContent +=
+    ` | Waves: ${waveHeightFeet.toFixed(1)} ft | Period: ${Math.round(swellPeriod)}s`;
+}
+
 document
   .getElementById("locationSelect")
   .addEventListener("change", function() {
