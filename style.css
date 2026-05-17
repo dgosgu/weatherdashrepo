@@ -264,28 +264,126 @@ body {
 }
 
 @media (max-width: 700px) {
+  body {
+    overflow-x: hidden;
+  }
 
   .page {
     grid-template-columns: 1fr;
-    padding: 20px 85px;
+    padding: 70px 14px 70px 14px;
+    gap: 16px;
   }
 
-  .side-meter {
-    width: 45px;
-    font-size: 12px;
+  .card,
+  .map-card {
+    border-radius: 18px;
+    min-height: auto;
+  }
+
+  .card {
+    padding: 22px;
   }
 
   .map-card {
-    height: 300px;
+    grid-column: 1;
+    height: 420px;
+    min-width: 0;
   }
 
-  .weather-main {
-    flex-direction: column;
+  .map-card.expanded {
+    height: 75vh;
+  }
+
+  #map {
+    height: 100%;
+  }
+
+  .side-meter {
+    position: fixed;
+    left: 0;
+    width: 100vw;
+    height: 36px;
+    z-index: 2000;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .side-meter span {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+
+  .left-meter {
+    top: 0;
+  }
+
+  .right-meter {
+    top: auto;
+    bottom: 0;
+  }
+
+  .top-row {
+    flex-wrap: wrap;
     gap: 8px;
   }
 
+  #locationSelect {
+    flex: 1 1 100%;
+    width: 100%;
+    font-size: 16px;
+    padding: 13px;
+  }
+
+  #favoriteBtn,
+  #radarBtn {
+    flex: 1;
+    padding: 13px;
+    font-size: 16px;
+  }
+
+  .weather-main {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .weather-main h1 {
+    font-size: 28px;
+  }
+
+  .weather-main h2 {
+    font-size: 32px;
+  }
+
+  #wind,
+  #desc {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
   #resizeMapBtn {
-    right: 52px;
-    top: 10px;
+    top: 12px;
+    right: 58px;
+    padding: 9px 12px;
+    font-size: 14px;
+  }
+
+  .locate-btn {
+    padding: 9px 11px;
+    font-size: 17px;
+  }
+
+  .leaflet-control-zoom {
+    display: none;
+  }
+
+  .leaflet-control-attribution {
+    font-size: 9px;
+  }
+
+  .sortable-ghost,
+  .sortable-chosen,
+  .sortable-drag {
+    transform: none;
   }
 }

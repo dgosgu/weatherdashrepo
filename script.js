@@ -426,17 +426,27 @@ document.getElementById("resizeMapBtn").addEventListener("click", function() {
   }, 250);
 });
 
-new Sortable(document.querySelector(".page"), {
+const sortable = new Sortable(document.querySelector(".page"), {
   animation: 200,
   ghostClass: "sortable-ghost",
   chosenClass: "sortable-chosen",
   dragClass: "sortable-drag",
+
+  disabled: window.innerWidth <= 700,
 
   onEnd: function() {
     setTimeout(() => {
       map.invalidateSize();
     }, 250);
   }
+});
+
+window.addEventListener("resize", function() {
+  sortable.option("disabled", window.innerWidth <= 700);
+
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 250);
 });
 
 loadWeather("Dorado");
