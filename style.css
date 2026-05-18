@@ -263,6 +263,24 @@ body {
   opacity: 0.9;
 }
 
+#windOverlayBtn,
+#heatOverlayBtn,
+#rainOverlayBtn {
+  background: #111827;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+#windOverlayBtn:hover,
+#heatOverlayBtn:hover,
+#rainOverlayBtn:hover {
+  background: #1f2937;
+  transform: scale(1.05);
+}
+
 @media (max-width: 700px) {
   body {
     overflow-x: hidden;

@@ -3,22 +3,18 @@ const locations = {
   "Goyu": { query: "Dorado,PR", coords: [18.47845809395691, -66.2766605615616] },
   "Ollo 13": { query: "Dorado,PR", coords: [18.477883166606762, -66.30981266498567] },
   "Vega Baja": { query: "Vega Baja,PR", coords: [18.4886, -66.3977] },
-
   "Isla Verde": { query: "Carolina,PR", coords: [18.4436, -66.0197] },
   "Ocean Park": { query: "San Juan,PR", coords: [18.4525, -66.0474] },
   "Pine Grove": { query: "Carolina,PR", coords: [18.4439, -66.0138] },
   "Escambron": { query: "San Juan,PR", coords: [18.4671, -66.0887] },
-
   "Luquillo": { query: "Luquillo,PR", coords: [18.3808, -65.7202] },
   "Fajardo": { query: "Fajardo,PR", coords: [18.3258, -65.6524] },
   "Seven Seas": { query: "Fajardo,PR", coords: [18.3685, -65.6367] },
-
   "Rincon": { query: "Rincon,PR", coords: [18.3402, -67.2499] },
   "Domes": { query: "Rincon,PR", coords: [18.3657, -67.2706] },
   "Maria's": { query: "Rincon,PR", coords: [18.3569, -67.2684] },
   "Sandy Beach": { query: "Rincon,PR", coords: [18.3712, -67.2546] },
   "Jobos": { query: "Isabela,PR", coords: [18.5121, -67.0765] },
-
   "La Parguera": { query: "Lajas,PR", coords: [17.9745, -67.0466] }
 };
 
@@ -49,6 +45,39 @@ fetch("/api/mapstyle")
 
     layer.addTo(map);
   });
+
+let heatLayer = null;
+let windLayer = null;
+
+function toggleTileOverlay(buttonId, layerName, layerType, label) {
+  const button = document.getElementById(buttonId);
+
+  if (window[layerName]) {
+    map.removeLayer(window[layerName]);
+    window[layerName] = null;
+    button.textContent = label;
+    return;
+  }
+
+  window[layerName] = L.tileLayer(
+    `/api/tiles?layer=${layerType}&z={z}&x={x}&y={y}`,
+    {
+      opacity: 0.55,
+      zIndex: 450,
+      maxZoom: 20
+    }
+  ).addTo(map);
+
+  button.textContent = `${label} On`;
+}
+
+document.getElementById("heatOverlayBtn").addEventListener("click", function() {
+  toggleTileOverlay("heatOverlayBtn", "heatLayer", "temp", "Heat");
+});
+
+document.getElementById("windOverlayBtn").addEventListener("click", function() {
+  toggleTileOverlay("windOverlayBtn", "windLayer", "wind", "Wind");
+});
 
 let radarLayers = [];
 let radarOn = false;
@@ -94,13 +123,13 @@ function turnOffRadar() {
   radarInterval = null;
 }
 
-document.getElementById("radarBtn").addEventListener("click", function() {
+document.getElementById("rainOverlayBtn").addEventListener("click", function() {
   if (radarOn) {
     turnOffRadar();
-    this.textContent = "Radar";
+    this.textContent = "Rain";
   } else {
     loadRadarAnimation();
-    this.textContent = "Radar On";
+    this.textContent = "Rain On";
   }
 });
 
