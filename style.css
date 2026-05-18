@@ -263,9 +263,9 @@ body {
   opacity: 0.9;
 }
 
-#windOverlayBtn,
-#heatOverlayBtn,
-#rainOverlayBtn {
+#noaaRadarBtn,
+#windArrowsBtn,
+#heatCircleBtn {
   background: #111827;
   color: white;
   border: none;
@@ -274,12 +274,12 @@ body {
   cursor: pointer;
 }
 
-#windOverlayBtn:hover,
-#heatOverlayBtn:hover,
-#rainOverlayBtn:hover {
-  background: #1f2937;
-  transform: scale(1.05);
+.wind-arrow {
+  font-size: 28px;
+  color: white;
+  text-shadow: 0 2px 8px black;
 }
+
 
 @media (max-width: 700px) {
   body {

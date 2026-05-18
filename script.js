@@ -20,6 +20,13 @@ const locations = {
 
 const map = L.map("map").setView(locations["GoodWinds"].coords, 13.3);
 
+let noaaRadarLayer = null;
+let windArrowLayer = L.layerGroup();
+let heatCircleLayer = L.layerGroup();
+
+let lastWeatherData = null;
+let lastLocationCoords = locations["GoodWinds"].coords;
+
 let fallbackLoaded = false;
 
 fetch("/api/mapstyle")
@@ -46,92 +53,111 @@ fetch("/api/mapstyle")
     layer.addTo(map);
   });
 
-let heatLayer = null;
-let windLayer = null;
-
-function toggleTileOverlay(buttonId, layerName, layerType, label) {
-  const button = document.getElementById(buttonId);
-
-  if (window[layerName]) {
-    map.removeLayer(window[layerName]);
-    window[layerName] = null;
-    button.textContent = label;
+document.getElementById("noaaRadarBtn").addEventListener("click", function() {
+  if (noaaRadarLayer) {
+    map.removeLayer(noaaRadarLayer);
+    noaaRadarLayer = null;
+    this.textContent = "NOAA Radar";
     return;
   }
 
-  window[layerName] = L.tileLayer(
-    `/api/tiles?layer=${layerType}&z={z}&x={x}&y={y}`,
+  noaaRadarLayer = L.tileLayer.wms(
+    "https://mapservices.weather.noaa.gov/eventdriven/services/radar/radar_base_reflectivity/MapServer/WMSServer",
     {
-      opacity: 0.55,
-      zIndex: 450,
-      maxZoom: 20
+      layers: "0",
+      format: "image/png",
+      transparent: true,
+      opacity: 0.65,
+      attribution: "NOAA / NWS Radar"
     }
   ).addTo(map);
 
-  button.textContent = `${label} On`;
-}
-
-document.getElementById("heatOverlayBtn").addEventListener("click", function() {
-  toggleTileOverlay("heatOverlayBtn", "heatLayer", "temp", "Heat");
+  this.textContent = "NOAA Radar On";
 });
 
-document.getElementById("windOverlayBtn").addEventListener("click", function() {
-  toggleTileOverlay("windOverlayBtn", "windLayer", "wind", "Wind");
-});
-
-let radarLayers = [];
-let radarOn = false;
-let radarFrameIndex = 0;
-let radarInterval = null;
-
-function loadRadarAnimation() {
-  fetch("https://api.rainviewer.com/public/weather-maps.json")
-    .then(res => res.json())
-    .then(data => {
-      const frames = data.radar.past;
-
-      radarLayers = frames.map(frame => {
-        const radarUrl = data.host + frame.path + "/256/{z}/{x}/{y}/2/1_1.png";
-
-        return L.tileLayer(radarUrl, {
-          opacity: 0,
-          zIndex: 500,
-          maxNativeZoom: 7,
-          maxZoom: 20,
-          attribution: "Radar data © RainViewer"
-        }).addTo(map);
-      });
-
-      radarFrameIndex = 0;
-      radarLayers[radarFrameIndex].setOpacity(0.65);
-
-      radarInterval = setInterval(() => {
-        radarLayers[radarFrameIndex].setOpacity(0);
-        radarFrameIndex = (radarFrameIndex + 1) % radarLayers.length;
-        radarLayers[radarFrameIndex].setOpacity(0.65);
-      }, 700);
-
-      radarOn = true;
-    });
-}
-
-function turnOffRadar() {
-  radarLayers.forEach(layer => map.removeLayer(layer));
-  radarLayers = [];
-  radarOn = false;
-  clearInterval(radarInterval);
-  radarInterval = null;
-}
-
-document.getElementById("rainOverlayBtn").addEventListener("click", function() {
-  if (radarOn) {
-    turnOffRadar();
-    this.textContent = "Rain";
-  } else {
-    loadRadarAnimation();
-    this.textContent = "Rain On";
+document.getElementById("windArrowsBtn").addEventListener("click", function() {
+  if (map.hasLayer(windArrowLayer)) {
+    map.removeLayer(windArrowLayer);
+    this.textContent = "Wind";
+    return;
   }
+
+  drawWindArrows();
+  windArrowLayer.addTo(map);
+  this.textContent = "Wind On";
 });
+
+function drawWindArrows() {
+  windArrowLayer.clearLayers();
+
+  if (!lastWeatherData) return;
+
+  const windDeg = lastWeatherData.wind.deg ?? 0;
+  const center = lastLocationCoords;
+
+  const offsets = [
+    [0, 0],
+    [0.01, 0],
+    [-0.01, 0],
+    [0, 0.01],
+    [0, -0.01],
+    [0.01, 0.01],
+    [-0.01, -0.01]
+  ];
+
+  offsets.forEach(offset => {
+    const lat = center[0] + offset[0];
+    const lng = center[1] + offset[1];
+
+    const icon = L.divIcon({
+      html: `<div class="wind-arrow" style="transform: rotate(${windDeg}deg)">↑</div>`,
+      className: "",
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    });
+
+    L.marker([lat, lng], { icon }).addTo(windArrowLayer);
+  });
+}
+
+document.getElementById("heatCircleBtn").addEventListener("click", function() {
+  if (map.hasLayer(heatCircleLayer)) {
+    map.removeLayer(heatCircleLayer);
+    this.textContent = "Heat";
+    return;
+  }
+
+  drawHeatCircle();
+  heatCircleLayer.addTo(map);
+  this.textContent = "Heat On";
+});
+
+function drawHeatCircle() {
+  heatCircleLayer.clearLayers();
+
+  if (!lastWeatherData) return;
+
+  const temp = lastWeatherData.main.temp;
+  const center = lastLocationCoords;
+
+  let color = "#22c55e";
+
+  if (temp >= 88) {
+    color = "#ef4444";
+  } else if (temp >= 82) {
+    color = "#eab308";
+  }
+
+  L.circle(center, {
+    radius: 2500,
+    color: color,
+    fillColor: color,
+    fillOpacity: 0.25,
+    weight: 2
+  })
+    .bindPopup(`Temperature: ${Math.round(temp)}°F`)
+    .addTo(heatCircleLayer);
+}
 
 Object.entries(locations).forEach(([name, spot]) => {
   L.marker(spot.coords)
@@ -149,6 +175,9 @@ function loadWeather(locationName) {
     .then(data => {
       const windKnots = Math.round(data.wind.speed * 0.869);
 
+      lastWeatherData = data;
+      lastLocationCoords = location.coords;
+
       document.getElementById("city").textContent = locationName;
       document.getElementById("temp").textContent = Math.round(data.main.temp) + "°F";
       document.getElementById("wind").textContent = "Wind: " + windKnots + " knots";
@@ -157,6 +186,9 @@ function loadWeather(locationName) {
 
       map.setView(location.coords, 13.3);
       loadMarineData(lat, lng);
+
+      if (map.hasLayer(windArrowLayer)) drawWindArrows();
+      if (map.hasLayer(heatCircleLayer)) drawHeatCircle();
     });
 }
 
