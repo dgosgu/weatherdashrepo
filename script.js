@@ -18,7 +18,10 @@ const locations = {
   "La Parguera": { query: "Lajas,PR", coords: [17.9745, -67.0466] }
 };
 
-const map = L.map("map").setView(locations["GoodWinds"].coords, 13.3);
+const map = L.map("map").setView(
+  locations["GoodWinds"].coords,
+  13.3
+);
 
 let noaaRadarLayer = null;
 let windArrowLayer = L.layerGroup();
@@ -32,6 +35,7 @@ let fallbackLoaded = false;
 fetch("/api/mapstyle")
   .then(res => res.json())
   .then(data => {
+
     const layer = L.tileLayer(data.url, {
       maxZoom: 20,
       attribution:
@@ -41,168 +45,289 @@ fetch("/api/mapstyle")
     });
 
     layer.on("tileerror", function() {
+
       if (fallbackLoaded) return;
+
       fallbackLoaded = true;
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        maxZoom: 20,
-        attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
-      }).addTo(map);
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        {
+          maxZoom: 20,
+          attribution:
+            "&copy; OpenStreetMap contributors &copy; CARTO"
+        }
+      ).addTo(map);
     });
 
     layer.addTo(map);
   });
 
-document.getElementById("noaaRadarBtn").addEventListener("click", function() {
-  if (noaaRadarLayer) {
-    map.removeLayer(noaaRadarLayer);
-    noaaRadarLayer = null;
-    this.textContent = "NOAA Radar";
-    return;
-  }
+document
+  .getElementById("noaaRadarBtn")
+  .addEventListener("click", function() {
 
-  noaaRadarLayer = L.tileLayer.wms(
-    "https://mapservices.weather.noaa.gov/eventdriven/services/radar/radar_base_reflectivity/MapServer/WMSServer",
-    {
-      layers: "0",
-      format: "image/png",
-      transparent: true,
-      opacity: 0.65,
-      attribution: "NOAA / NWS Radar"
+    if (noaaRadarLayer) {
+
+      map.removeLayer(noaaRadarLayer);
+
+      noaaRadarLayer = null;
+
+      this.textContent = "NOAA Radar";
+
+      return;
     }
-  ).addTo(map);
 
-  this.textContent = "NOAA Radar On";
-});
+    noaaRadarLayer = L.tileLayer(
+      "https://mapservices.weather.noaa.gov/eventdriven/rest/services/radar/radar_base_reflectivity/MapServer/tile/{z}/{y}/{x}",
+      {
+        opacity: 0.65,
+        zIndex: 600,
+        maxZoom: 20,
+        attribution: "NOAA / NWS Radar"
+      }
+    ).addTo(map);
 
-document.getElementById("windArrowsBtn").addEventListener("click", function() {
-  if (map.hasLayer(windArrowLayer)) {
-    map.removeLayer(windArrowLayer);
-    this.textContent = "Wind";
-    return;
-  }
+    this.textContent = "NOAA Radar On";
+  });
 
-  drawWindArrows();
-  windArrowLayer.addTo(map);
-  this.textContent = "Wind On";
-});
+document
+  .getElementById("windArrowsBtn")
+  .addEventListener("click", function() {
+
+    if (map.hasLayer(windArrowLayer)) {
+
+      map.removeLayer(windArrowLayer);
+
+      this.textContent = "Wind";
+
+      return;
+    }
+
+    drawWindArrows();
+
+    windArrowLayer.addTo(map);
+
+    this.textContent = "Wind On";
+  });
 
 function drawWindArrows() {
+
   windArrowLayer.clearLayers();
 
   if (!lastWeatherData) return;
 
-  const windDeg = lastWeatherData.wind.deg ?? 0;
-  const center = lastLocationCoords;
+  const windDeg =
+    lastWeatherData.wind.deg ?? 0;
 
-  const offsets = [
-    [0, 0],
-    [0.01, 0],
-    [-0.01, 0],
-    [0, 0.01],
-    [0, -0.01],
-    [0.01, 0.01],
-    [-0.01, -0.01]
-  ];
+  const bounds = map.getBounds();
 
-  offsets.forEach(offset => {
-    const lat = center[0] + offset[0];
-    const lng = center[1] + offset[1];
+  const north = bounds.getNorth();
+  const south = bounds.getSouth();
+  const east = bounds.getEast();
+  const west = bounds.getWest();
 
-    const icon = L.divIcon({
-      html: `<div class="wind-arrow" style="transform: rotate(${windDeg}deg)">↑</div>`,
-      className: "",
-      iconSize: [30, 30],
-      iconAnchor: [15, 15]
-    });
+  const rows = 7;
+  const cols = 9;
 
-    L.marker([lat, lng], { icon }).addTo(windArrowLayer);
-  });
+  for (let r = 0; r < rows; r++) {
+
+    for (let c = 0; c < cols; c++) {
+
+      const lat =
+        south +
+        ((north - south) * r) /
+        (rows - 1);
+
+      const lng =
+        west +
+        ((east - west) * c) /
+        (cols - 1);
+
+      const icon = L.divIcon({
+        html:
+          `<div class="wind-arrow" style="transform: rotate(${windDeg}deg)">↑</div>`,
+        className: "",
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+
+      L.marker([lat, lng], { icon })
+        .addTo(windArrowLayer);
+    }
+  }
 }
 
-document.getElementById("heatCircleBtn").addEventListener("click", function() {
-  if (map.hasLayer(heatCircleLayer)) {
-    map.removeLayer(heatCircleLayer);
-    this.textContent = "Heat";
-    return;
-  }
+document
+  .getElementById("heatCircleBtn")
+  .addEventListener("click", function() {
 
-  drawHeatCircle();
-  heatCircleLayer.addTo(map);
-  this.textContent = "Heat On";
-});
+    if (map.hasLayer(heatCircleLayer)) {
+
+      map.removeLayer(heatCircleLayer);
+
+      this.textContent = "Heat";
+
+      return;
+    }
+
+    drawHeatCircle();
+
+    heatCircleLayer.addTo(map);
+
+    this.textContent = "Heat On";
+  });
 
 function drawHeatCircle() {
+
   heatCircleLayer.clearLayers();
 
   if (!lastWeatherData) return;
 
-  const temp = lastWeatherData.main.temp;
-  const center = lastLocationCoords;
+  const temp =
+    lastWeatherData.main.temp;
+
+  const bounds = map.getBounds();
+
+  const north = bounds.getNorth();
+  const south = bounds.getSouth();
+  const east = bounds.getEast();
+  const west = bounds.getWest();
+
+  const rows = 6;
+  const cols = 8;
 
   let color = "#22c55e";
 
-  if (temp >= 88) {
-    color = "#ef4444";
-  } else if (temp >= 82) {
+  if (temp >= 90) {
+
+    color = "#dc2626";
+
+  } else if (temp >= 85) {
+
+    color = "#f97316";
+
+  } else if (temp >= 80) {
+
     color = "#eab308";
   }
 
-  L.circle(center, {
-    radius: 2500,
-    color: color,
-    fillColor: color,
-    fillOpacity: 0.25,
-    weight: 2
-  })
-    .bindPopup(`Temperature: ${Math.round(temp)}°F`)
-    .addTo(heatCircleLayer);
+  for (let r = 0; r < rows; r++) {
+
+    for (let c = 0; c < cols; c++) {
+
+      const lat =
+        south +
+        ((north - south) * r) /
+        (rows - 1);
+
+      const lng =
+        west +
+        ((east - west) * c) /
+        (cols - 1);
+
+      L.circle([lat, lng], {
+        radius: 1800,
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.18,
+        weight: 0
+      }).addTo(heatCircleLayer);
+    }
+  }
 }
 
+map.on("moveend zoomend", function() {
+
+  if (map.hasLayer(windArrowLayer)) {
+    drawWindArrows();
+  }
+
+  if (map.hasLayer(heatCircleLayer)) {
+    drawHeatCircle();
+  }
+});
+
 Object.entries(locations).forEach(([name, spot]) => {
+
   L.marker(spot.coords)
     .addTo(map)
-    .bindPopup(`<b>${name}</b><br>${spot.coords[0]}, ${spot.coords[1]}`);
+    .bindPopup(
+      `<b>${name}</b><br>${spot.coords[0]}, ${spot.coords[1]}`
+    );
 });
 
 function loadWeather(locationName) {
+
   const location = locations[locationName];
+
   const lat = location.coords[0];
   const lng = location.coords[1];
 
-  fetch(`/api/weather?query=${encodeURIComponent(location.query)}`)
+  fetch(
+    `/api/weather?query=${encodeURIComponent(location.query)}`
+  )
     .then(res => res.json())
     .then(data => {
-      const windKnots = Math.round(data.wind.speed * 0.869);
+
+      const windKnots =
+        Math.round(data.wind.speed * 0.869);
 
       lastWeatherData = data;
       lastLocationCoords = location.coords;
 
-      document.getElementById("city").textContent = locationName;
-      document.getElementById("temp").textContent = Math.round(data.main.temp) + "°F";
-      document.getElementById("wind").textContent = "Wind: " + windKnots + " knots";
-      document.getElementById("desc").textContent = data.weather[0].description;
-      document.getElementById("kiteMeter").style.background = getKiteColor(windKnots);
+      document.getElementById("city").textContent =
+        locationName;
+
+      document.getElementById("temp").textContent =
+        Math.round(data.main.temp) + "°F";
+
+      document.getElementById("wind").textContent =
+        "Wind: " + windKnots + " knots";
+
+      document.getElementById("desc").textContent =
+        data.weather[0].description;
+
+      document.getElementById("kiteMeter").style.background =
+        getKiteColor(windKnots);
 
       map.setView(location.coords, 13.3);
+
       loadMarineData(lat, lng);
 
-      if (map.hasLayer(windArrowLayer)) drawWindArrows();
-      if (map.hasLayer(heatCircleLayer)) drawHeatCircle();
+      if (map.hasLayer(windArrowLayer)) {
+        drawWindArrows();
+      }
+
+      if (map.hasLayer(heatCircleLayer)) {
+        drawHeatCircle();
+      }
     });
 }
 
 function loadMarineData(lat, lng) {
-  const cacheKey = `marine-${lat}-${lng}`;
-  const cached = localStorage.getItem(cacheKey);
+
+  const cacheKey =
+    `marine-${lat}-${lng}`;
+
+  const cached =
+    localStorage.getItem(cacheKey);
 
   if (cached) {
-    const parsed = JSON.parse(cached);
-    const age = Date.now() - parsed.timestamp;
-    const thirtyMinutes = 1000 * 60 * 30;
+
+    const parsed =
+      JSON.parse(cached);
+
+    const age =
+      Date.now() - parsed.timestamp;
+
+    const thirtyMinutes =
+      1000 * 60 * 30;
 
     if (age < thirtyMinutes) {
+
       applyMarineData(parsed.data);
+
       return;
     }
   }
@@ -210,25 +335,39 @@ function loadMarineData(lat, lng) {
   fetch(`/api/marine?lat=${lat}&lng=${lng}`)
     .then(res => res.json())
     .then(data => {
-      if (!data.hours || !data.hours.length) {
-        document.getElementById("surfMeter").style.background = "#6b7280";
+
+      if (
+        !data.hours ||
+        !data.hours.length
+      ) {
+
+        document.getElementById("surfMeter").style.background =
+          "#6b7280";
+
         return;
       }
 
-      localStorage.setItem(cacheKey, JSON.stringify({
-        timestamp: Date.now(),
-        data: data
-      }));
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          timestamp: Date.now(),
+          data: data
+        })
+      );
 
       applyMarineData(data);
     })
     .catch(() => {
-      document.getElementById("surfMeter").style.background = "#6b7280";
+
+      document.getElementById("surfMeter").style.background =
+        "#6b7280";
     });
 }
 
 function applyMarineData(data) {
-  const current = data.hours[0];
+
+  const current =
+    data.hours[0];
 
   const waveHeightMeters =
     current.waveHeight?.noaa ??
@@ -242,38 +381,71 @@ function applyMarineData(data) {
     current.swellPeriod?.sg ??
     0;
 
-  const waveHeightFeet = waveHeightMeters * 3.281;
+  const waveHeightFeet =
+    waveHeightMeters * 3.281;
 
   document.getElementById("surfMeter").style.background =
-    getSurfColor(waveHeightFeet, swellPeriod);
+    getSurfColor(
+      waveHeightFeet,
+      swellPeriod
+    );
 
   document.getElementById("desc").textContent +=
     ` | Waves: ${waveHeightFeet.toFixed(1)} ft | Period: ${Math.round(swellPeriod)}s`;
 }
 
-document.getElementById("locationSelect").addEventListener("change", function() {
-  loadWeather(this.value);
-});
+document
+  .getElementById("locationSelect")
+  .addEventListener("change", function() {
 
-document.getElementById("favoriteBtn").addEventListener("click", function() {
-  this.textContent = this.textContent === "☆" ? "★" : "☆";
-});
+    loadWeather(this.value);
+  });
+
+document
+  .getElementById("favoriteBtn")
+  .addEventListener("click", function() {
+
+    this.textContent =
+      this.textContent === "☆"
+        ? "★"
+        : "☆";
+  });
 
 map.on("click", function(e) {
-  alert("Lat: " + e.latlng.lat + "\nLng: " + e.latlng.lng);
+
+  alert(
+    "Lat: " +
+    e.latlng.lat +
+    "\nLng: " +
+    e.latlng.lng
+  );
 });
 
-const locateControl = L.control({ position: "topright" });
+const locateControl = L.control({
+  position: "topright"
+});
 
 locateControl.onAdd = function() {
-  const button = L.DomUtil.create("button", "locate-btn");
+
+  const button =
+    L.DomUtil.create(
+      "button",
+      "locate-btn"
+    );
+
   button.innerHTML = "📍";
-  button.title = "Find my location";
+
+  button.title =
+    "Find my location";
 
   L.DomEvent.disableClickPropagation(button);
 
   button.onclick = function() {
-    map.locate({ setView: true, maxZoom: 16 });
+
+    map.locate({
+      setView: true,
+      maxZoom: 16
+    });
   };
 
   return button;
@@ -282,6 +454,7 @@ locateControl.onAdd = function() {
 locateControl.addTo(map);
 
 map.on("locationfound", function(e) {
+
   L.marker(e.latlng)
     .addTo(map)
     .bindPopup("You are here")
@@ -289,57 +462,132 @@ map.on("locationfound", function(e) {
 });
 
 function getKiteColor(windKnots) {
-  if (windKnots >= 16 && windKnots <= 25) return "#22c55e";
-  if (windKnots >= 10 && windKnots < 16) return "#eab308";
-  if (windKnots > 25 && windKnots <= 32) return "#eab308";
-  if (windKnots > 32) return "#ad005f";
-  return "#ef4444";
+
+  if (
+    windKnots >= 16 &&
+    windKnots <= 25
+  ) {
+
+    return "#22c55e";
+
+  } else if (
+    windKnots >= 10 &&
+    windKnots < 16
+  ) {
+
+    return "#eab308";
+
+  } else if (
+    windKnots > 25 &&
+    windKnots <= 32
+  ) {
+
+    return "#eab308";
+
+  } else if (
+    windKnots > 32
+  ) {
+
+    return "#ad005f";
+
+  } else {
+
+    return "#ef4444";
+  }
 }
 
-function getSurfColor(waveHeightFeet, swellPeriod) {
-  if (waveHeightFeet >= 3 && waveHeightFeet <= 8 && swellPeriod >= 9) return "#22c55e";
-  if (waveHeightFeet >= 2 && swellPeriod >= 6) return "#eab308";
-  if (waveHeightFeet > 8) return "#ad005f";
-  return "#ef4444";
+function getSurfColor(
+  waveHeightFeet,
+  swellPeriod
+) {
+
+  if (
+    waveHeightFeet >= 3 &&
+    waveHeightFeet <= 8 &&
+    swellPeriod >= 9
+  ) {
+
+    return "#22c55e";
+
+  } else if (
+    waveHeightFeet >= 2 &&
+    swellPeriod >= 6
+  ) {
+
+    return "#eab308";
+
+  } else if (
+    waveHeightFeet > 8
+  ) {
+
+    return "#ad005f";
+
+  } else {
+
+    return "#ef4444";
+  }
 }
 
 new ResizeObserver(() => {
+
   map.invalidateSize();
-}).observe(document.querySelector(".map-card"));
 
-document.getElementById("resizeMapBtn").addEventListener("click", function() {
-  const mapCard = document.querySelector(".map-card");
+}).observe(
+  document.querySelector(".map-card")
+);
 
-  mapCard.classList.toggle("expanded");
+document
+  .getElementById("resizeMapBtn")
+  .addEventListener("click", function() {
 
-  this.textContent = mapCard.classList.contains("expanded")
-    ? "Shrink"
-    : "Expand";
+    const mapCard =
+      document.querySelector(".map-card");
 
-  setTimeout(() => {
-    map.invalidateSize();
-  }, 250);
-});
+    mapCard.classList.toggle("expanded");
 
-const sortable = new Sortable(document.querySelector(".page"), {
-  animation: 200,
-  ghostClass: "sortable-ghost",
-  chosenClass: "sortable-chosen",
-  dragClass: "sortable-drag",
-  disabled: window.innerWidth <= 700,
+    this.textContent =
+      mapCard.classList.contains("expanded")
+        ? "Shrink"
+        : "Expand";
 
-  onEnd: function() {
     setTimeout(() => {
+
       map.invalidateSize();
+
     }, 250);
+  });
+
+const sortable = new Sortable(
+  document.querySelector(".page"),
+  {
+    animation: 200,
+    ghostClass: "sortable-ghost",
+    chosenClass: "sortable-chosen",
+    dragClass: "sortable-drag",
+    disabled: window.innerWidth <= 700,
+
+    onEnd: function() {
+
+      setTimeout(() => {
+
+        map.invalidateSize();
+
+      }, 250);
+    }
   }
-});
+);
 
 window.addEventListener("resize", function() {
-  sortable.option("disabled", window.innerWidth <= 700);
+
+  sortable.option(
+    "disabled",
+    window.innerWidth <= 700
+  );
 
   setTimeout(() => {
+
     map.invalidateSize();
+
   }, 250);
 });
 
