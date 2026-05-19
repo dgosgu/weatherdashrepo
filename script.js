@@ -461,6 +461,38 @@ function updateSpotIntelligence(locationName, windKnots, waveHeightFeet, swellPe
   document.getElementById("spotSummary").textContent = `Summary: ${summary}`;
 }
 
+function loadBuoyData() {
+  fetch("/api/buoy?station=41053")
+    .then(res => res.json())
+    .then(data => {
+      const b = data.parsed;
+
+      const waveFt = b.waveHeightMeters * 3.281;
+      const windKnots = b.windSpeedMps * 1.944;
+      const gustKnots = b.windGustMps * 1.944;
+      const waterF = (b.waterTempC * 9) / 5 + 32;
+
+      document.getElementById("buoyWave").textContent =
+        `Wave: ${waveFt.toFixed(1)} ft`;
+
+      document.getElementById("buoyPeriod").textContent =
+        `Period: ${b.dominantPeriod}s`;
+
+      document.getElementById("buoyDirection").textContent =
+        `Direction: ${b.meanWaveDirection}°`;
+
+      document.getElementById("buoyWind").textContent =
+        `Wind: ${Math.round(windKnots)} kt, gust ${Math.round(gustKnots)} kt`;
+
+      document.getElementById("buoyWater").textContent =
+        `Water: ${Math.round(waterF)}°F`;
+    })
+    .catch(() => {
+      document.getElementById("buoyWave").textContent =
+        "Buoy unavailable";
+    });
+}
+
 function loadAlerts(lat, lng) {
   fetch(`/api/alerts?lat=${lat}&lng=${lng}`)
     .then(res => res.json())
@@ -503,4 +535,5 @@ function loadTideData(lat, lng) {
     });
 }
 
+loadBuoyData();
 loadWeather("GoodWinds");
